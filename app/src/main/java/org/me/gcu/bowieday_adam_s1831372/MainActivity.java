@@ -26,16 +26,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Base64;
 
 
@@ -116,22 +112,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             //Clean up any leading garbage characters
             int i = result.indexOf("<?"); //initial tag
+            if (i < 0) {
+                Log.e("MyTask", "No xml downloaded");
+                return; // download failed (i.e. no internet): substring(-1) would crash
+            }
             result = result.substring(i);
 
             // Now that you have the xml data into result, you can parse it
-            try {
-                XmlPullParserFactory factory =
-                        XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput( new StringReader( result ) );
-
-                //YOUR PARSING HERE!!!
-
-
-            } catch (XmlPullParserException e) {
-                Log.e("Parsing","EXCEPTION" + e);
-                //throw new RuntimeException(e);
+            ArrayList<Situation> situations = TrafficParser.parseData(result);
+            for (Situation s : situations) {
+                Log.d("MyTag", s.toString());
             }
 
             // Now update the TextView to display raw XML data
