@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
  * Shows the incidents or the roadworks (chosen with the radio buttons) in a ListView.
  * The data comes from the Activity's TrafficViewModel, shared by all the fragments.
  */
-public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener
+public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener, AdapterView.OnItemClickListener
 {
     private TrafficViewModel viewModel;
     private RadioGroup feedChoice;
@@ -38,7 +40,17 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         listView.setEmptyView(v.findViewById(R.id.emptyText));
         adapter = new SituationAdapter(requireContext(), new ArrayList<>());
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
         return v;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        Situation tapped = adapter.getItem(position);
+        viewModel.select(tapped);
+        // Temporary until the detail fragment is added
+        Toast.makeText(requireContext(), "Selected: " + tapped.getDisplayType(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

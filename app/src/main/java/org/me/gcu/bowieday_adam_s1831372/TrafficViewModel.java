@@ -91,6 +91,13 @@ public class TrafficViewModel extends ViewModel
 
     public void setShowingRoadworks(boolean showingRoadworks) { this.showingRoadworks = showingRoadworks; }
 
+    // The situation the user tapped in the list (shown in the detail view)
+    private final MutableLiveData<Situation> selected = new MutableLiveData<>();
+
+    public LiveData<Situation> getSelected() { return selected; }
+
+    public void select(Situation situation) { selected.setValue(situation); }
+
     /**
      * Downloads both feeds again (in the background); observers are updated when the results arrive.
      */
