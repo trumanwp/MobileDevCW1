@@ -50,6 +50,34 @@ public class TrafficViewModel extends ViewModel
         }
     };
 
+    // Auto-update: every hour (can be reduced for the demo video)
+    private static final long REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+
+    // Downloads, then schedules itself to run again after REFRESH_INTERVAL_MS
+    private final Runnable refreshTask = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            refresh();
+            updateHandler.postDelayed(this, REFRESH_INTERVAL_MS);
+        }
+    };
+
+    public TrafficViewModel()
+    {
+        // Only runs the first time the ViewModel is created (not on rotation),
+        // so the app downloads on start-up without a button press
+        updateHandler.post(refreshTask);
+    }
+
+    // Called when the app is closed for good: stop the timer
+    @Override
+    protected void onCleared()
+    {
+        updateHandler.removeCallbacksAndMessages(null);
+    }
+
     public LiveData<ArrayList<Situation>> getIncidents() { return incidents; }
 
     public LiveData<ArrayList<Situation>> getRoadworks() { return roadworks; }
