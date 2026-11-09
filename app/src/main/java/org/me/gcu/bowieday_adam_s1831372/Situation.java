@@ -49,6 +49,38 @@ public class Situation
         return recordType;
     }
 
+    /**
+     * Readable type for the list, i.e. "Road closed", "Queuing traffic" or "Roadworks - TTL".
+     */
+    public String getDisplayType() {
+        if (isRoadworks())
+        {
+            return workType.isEmpty() ? "Roadworks" : "Roadworks - " + workType;
+        }
+        return splitCamelCase(subType.isEmpty() ? recordType : subType);
+    }
+
+    // "roadClosed" -> "Road closed"
+    private static String splitCamelCase(String text) {
+        StringBuilder result = new StringBuilder();
+        for (char c : text.toCharArray())
+        {
+            if (result.length() == 0)
+            {
+                result.append(Character.toUpperCase(c));
+            }
+            else if (Character.isUpperCase(c))
+            {
+                result.append(' ').append(Character.toLowerCase(c));
+            }
+            else
+            {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
     public void setRecordType(String recordType) {
         this.recordType = recordType;
     }

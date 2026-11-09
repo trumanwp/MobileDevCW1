@@ -84,6 +84,13 @@ public class TrafficViewModel extends ViewModel
 
     public LiveData<String> getStatus() { return status; }
 
+    // Which feed the list shows, kept here so it survives rotation
+    private boolean showingRoadworks = false;
+
+    public boolean isShowingRoadworks() { return showingRoadworks; }
+
+    public void setShowingRoadworks(boolean showingRoadworks) { this.showingRoadworks = showingRoadworks; }
+
     /**
      * Downloads both feeds again (in the background); observers are updated when the results arrive.
      */

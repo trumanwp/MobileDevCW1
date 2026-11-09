@@ -1,40 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- MPD XML Starter code 2025-2026 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
 
+    <TextView
+        android:id="@+id/salutation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:text="Scottish Traffic Info"
+        />
+    <TextView
+        android:id="@+id/acknowledgement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="Contains Traffic Scotland data"
+        />
+
+    <!-- Status line + manual refresh, side by side -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
         <TextView
-            android:id="@+id/salutation"
-            android:layout_width="fill_parent"
+            android:id="@+id/statusText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Welcome to Mobile Platform Development"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:text="Not downloaded yet"
             />
         <Button
             android:id="@+id/startButton"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Refresh now"
             />
-        <TextView
-            android:id="@+id/acknowledgement"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Contains Traffic Scotland data"
-            />
-        <TextView
-            android:id="@+id/rawDataDisplay"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Raw Data is Displayed here"
-            />
     </LinearLayout>
-</ScrollView>
+
+    <!-- The fragments (list, later detail/map) are placed here -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

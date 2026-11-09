@@ -26,8 +26,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+/**
+ * The single Activity: shows the status line and refresh button,
+ * and hosts the fragments in fragmentContainer.
+ */
 public class MainActivity extends AppCompatActivity implements OnClickListener {
-    private TextView rawDataDisplay;
+    private TextView statusText;
     private Button startButton;
     private TrafficViewModel viewModel; // Holds the data, survives screen rotation
 
@@ -36,45 +40,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        int margin = (int) (8 * getResources().getDisplayMetrics().density); // 8dp gap from the screen edges
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left + margin, systemBars.top, systemBars.right + margin, systemBars.bottom);
             return insets;
         });
         // Set up the raw links to the graphical components
-        rawDataDisplay = (TextView)findViewById(R.id.rawDataDisplay);
+        statusText = (TextView)findViewById(R.id.statusText);
         startButton = (Button)findViewById(R.id.startButton);
         startButton.setOnClickListener(this);
 
         //ViewModelProvider creates the ViewModel the first time, and reconnects to the same one after a rotation
         viewModel = new ViewModelProvider(this).get(TrafficViewModel.class);
-        //Observe the LiveData: the text is updated whenever new data arrives (and straight away after a rotation)
-        viewModel.getIncidents().observe(this, list -> updateText());
-        viewModel.getRoadworks().observe(this, list -> updateText());
-        viewModel.getStatus().observe(this, text -> updateText());
+        viewModel.getStatus().observe(this, statusText::setText);
+
+        // Only add the fragment the first time: after a rotation Android restores it by itself
+        if (savedInstanceState == null)
+        {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new SituationListFragment())
+                    .commit();
+        }
     }
 
     public void onClick(View aview)
     {
         viewModel.refresh();
-    }
-
-    // Temporary display of the parsed data until the list fragment is built
-    private void updateText()
-    {
-        StringBuilder text = new StringBuilder();
-        text.append(viewModel.getStatus().getValue()).append("\n\n");
-        text.append("INCIDENTS (").append(viewModel.getIncidents().getValue().size()).append(")\n\n");
-        for (Situation s : viewModel.getIncidents().getValue())
-        {
-            text.append(s.getSubType()).append(": ").append(s.getComment()).append("\n\n");
-        }
-        text.append("ROADWORKS (").append(viewModel.getRoadworks().getValue().size()).append(")\n\n");
-        for (Situation s : viewModel.getRoadworks().getValue())
-        {
-            text.append(s.getWorkType()).append(": ").append(s.getComment()).append("\n\n");
-        }
-        rawDataDisplay.setText(text.toString());
     }
 
 } // End of class
