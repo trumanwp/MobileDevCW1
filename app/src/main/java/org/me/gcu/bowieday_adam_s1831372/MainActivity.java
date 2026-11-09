@@ -14,9 +14,6 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,16 +24,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import java.util.ArrayList;
+import androidx.lifecycle.ViewModelProvider;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView rawDataDisplay;
     private Button startButton;
-    // This is the activity main thread Handler, receives results from TrafficFeed's worker thread
-    private Handler updateUIHandler = null;
-    private ArrayList<Situation> incidents = new ArrayList<>();
-    private ArrayList<Situation> roadworks = new ArrayList<>();
+    private TrafficViewModel viewModel; // Holds the data, survives screen rotation
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,57 +45,32 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rawDataDisplay = (TextView)findViewById(R.id.rawDataDisplay);
         startButton = (Button)findViewById(R.id.startButton);
         startButton.setOnClickListener(this);
-        createUpdateUiHandler();
+
+        //ViewModelProvider creates the ViewModel the first time, and reconnects to the same one after a rotation
+        viewModel = new ViewModelProvider(this).get(TrafficViewModel.class);
+        //Observe the LiveData: the text is updated whenever new data arrives (and straight away after a rotation)
+        viewModel.getIncidents().observe(this, list -> updateText());
+        viewModel.getRoadworks().observe(this, list -> updateText());
+        viewModel.getStatus().observe(this, text -> updateText());
     }
 
     public void onClick(View aview)
     {
-        rawDataDisplay.setText("Downloading...");
-        TrafficFeed.startDownload(updateUIHandler);
-    }
-
-    /* Create Handler object in main thread. */
-    private void createUpdateUiHandler()
-    {
-        if (updateUIHandler == null)
-        {
-            updateUIHandler = new Handler(Looper.getMainLooper())
-            {
-                @Override
-                @SuppressWarnings("unchecked")
-                public void handleMessage(Message msg)
-                {
-                    // Runs on the main thread, so it's safe to update widgets here
-                    if (msg.what == TrafficFeed.MESSAGE_INCIDENTS)
-                    {
-                        incidents = (ArrayList<Situation>) msg.obj;
-                    }
-                    else if (msg.what == TrafficFeed.MESSAGE_ROADWORKS)
-                    {
-                        roadworks = (ArrayList<Situation>) msg.obj;
-                    }
-                    else if (msg.what == TrafficFeed.MESSAGE_FAILED)
-                    {
-                        rawDataDisplay.setText("Couldn't download " + msg.obj + " - check the internet connection");
-                        return;
-                    }
-                    updateText();
-                }
-            };
-        }
+        viewModel.refresh();
     }
 
     // Temporary display of the parsed data until the list fragment is built
     private void updateText()
     {
         StringBuilder text = new StringBuilder();
-        text.append("INCIDENTS (").append(incidents.size()).append(")\n\n");
-        for (Situation s : incidents)
+        text.append(viewModel.getStatus().getValue()).append("\n\n");
+        text.append("INCIDENTS (").append(viewModel.getIncidents().getValue().size()).append(")\n\n");
+        for (Situation s : viewModel.getIncidents().getValue())
         {
             text.append(s.getSubType()).append(": ").append(s.getComment()).append("\n\n");
         }
-        text.append("ROADWORKS (").append(roadworks.size()).append(")\n\n");
-        for (Situation s : roadworks)
+        text.append("ROADWORKS (").append(viewModel.getRoadworks().getValue().size()).append(")\n\n");
+        for (Situation s : viewModel.getRoadworks().getValue())
         {
             text.append(s.getWorkType()).append(": ").append(s.getComment()).append("\n\n");
         }
