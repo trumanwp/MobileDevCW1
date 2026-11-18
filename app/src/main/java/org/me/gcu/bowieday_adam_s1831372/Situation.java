@@ -115,6 +115,35 @@ public class Situation
         return Duration.between(startTime, endTime).toHours();
     }
 
+    // Roadworks duration bands for the colour-coding: up to a week, up to a month, longer
+    public String getDurationCategory() {
+        long hours = getDurationHours();
+        if (!isRoadworks() || hours < 0)
+        {
+            return "";
+        }
+        if (hours <= 7 * 24)
+        {
+            return "Short-term";
+        }
+        if (hours <= 30 * 24)
+        {
+            return "Medium-term";
+        }
+        return "Long-term";
+    }
+
+    // Colour for the duration band (0 = no colour, i.e. incidents)
+    public int getDurationColour() {
+        switch (getDurationCategory())
+        {
+            case "Short-term": return R.color.duration_short;
+            case "Medium-term": return R.color.duration_medium;
+            case "Long-term": return R.color.duration_long;
+            default: return 0;
+        }
+    }
+
     // i.e. "3 days 4 hours", "6 hours" or "Ongoing"
     public String getDurationText() {
         long hours = getDurationHours();
@@ -123,6 +152,14 @@ public class Situation
             return "Ongoing (no end time given)";
         }
         long days = hours / 24;
+        if (days >= 730)
+        {
+            return "about " + days / 365 + " years";
+        }
+        if (days >= 60)
+        {
+            return "about " + days / 30 + " months";
+        }
         if (days == 0)
         {
             return hours + (hours == 1 ? " hour" : " hours");
@@ -139,8 +176,12 @@ public class Situation
         return direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
     }
 
-    // "longDelays" -> "Long delays"
+    // "longDelays" -> "Long delays", plain "delays" -> "Some delays"
     public String getDelaysText() {
+        if (delaysType.equalsIgnoreCase("delays"))
+        {
+            return "Some delays";
+        }
         return delaysType.isEmpty() ? "" : splitCamelCase(delaysType);
     }
 

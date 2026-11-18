@@ -37,6 +37,15 @@
             android:layout_marginTop="8dp"
             android:textSize="16sp" />
 
+        <!-- Roadworks only: duration band in its colour -->
+        <TextView
+            android:id="@+id/detailDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
         <TextView
             style="@style/DetailHeading"
             android:text="When" />

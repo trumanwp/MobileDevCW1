@@ -2,6 +2,7 @@ package org.me.gcu.bowieday_adam_s1831372;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -25,6 +27,7 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     private TrafficViewModel viewModel;
     private RadioGroup feedChoice;
     private RadioButton incidentsButton, roadworksButton;
+    private TextView durationKey;
     private SituationAdapter adapter;
     private SituationListListener listener;
 
@@ -63,6 +66,12 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         feedChoice = (RadioGroup) v.findViewById(R.id.feedChoice);
         incidentsButton = (RadioButton) v.findViewById(R.id.incidentsButton);
         roadworksButton = (RadioButton) v.findViewById(R.id.roadworksButton);
+        durationKey = (TextView) v.findViewById(R.id.durationKey);
+        // Each band name is written in its own colour
+        durationKey.setText(Html.fromHtml("Duration: "
+                + "<font color='#2E7D32'><b>■ Short</b></font> (up to a week)  "
+                + "<font color='#E68A00'><b>■ Medium</b></font> (up to a month)  "
+                + "<font color='#C62828'><b>■ Long</b></font>", Html.FROM_HTML_MODE_LEGACY));
 
         ListView listView = (ListView) v.findViewById(R.id.situationList);
         listView.setEmptyView(v.findViewById(R.id.emptyText));
@@ -118,6 +127,7 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
 
         adapter.clear();
         adapter.addAll(viewModel.isShowingRoadworks() ? roadworks : incidents);
+        durationKey.setVisibility(viewModel.isShowingRoadworks() ? View.VISIBLE : View.GONE);
     }
 
 } // End of class

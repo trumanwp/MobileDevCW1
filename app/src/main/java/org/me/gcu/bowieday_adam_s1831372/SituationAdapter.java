@@ -1,12 +1,15 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -35,6 +38,23 @@ public class SituationAdapter extends ArrayAdapter<Situation>
         icon.setImageResource(s.getIconResource());
         type.setText(s.getDisplayType());
         comment.setText(s.getComment());
+
+        // Roadworks: colour bar + "Long-term · 1624 days" in the duration colour. Incidents: nothing
+        View bar = convertView.findViewById(R.id.itemDurationBar);
+        TextView duration = (TextView) convertView.findViewById(R.id.itemDuration);
+        if (s.getDurationColour() != 0)
+        {
+            int colour = ContextCompat.getColor(getContext(), s.getDurationColour());
+            bar.setBackgroundColor(colour);
+            duration.setTextColor(colour);
+            duration.setText(s.getDurationCategory() + " · " + s.getDurationText());
+            duration.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            bar.setBackgroundColor(Color.TRANSPARENT);
+            duration.setVisibility(View.GONE);
+        }
         return convertView;
     }
 } // End of class

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -20,7 +21,7 @@ import java.util.Locale;
 public class SituationDetailFragment extends Fragment
 {
     private ImageView icon;
-    private TextView type, comment, when, impact, where, record;
+    private TextView type, comment, duration, when, impact, where, record;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -30,6 +31,7 @@ public class SituationDetailFragment extends Fragment
         icon = (ImageView) v.findViewById(R.id.detailIcon);
         type = (TextView) v.findViewById(R.id.detailType);
         comment = (TextView) v.findViewById(R.id.detailComment);
+        duration = (TextView) v.findViewById(R.id.detailDuration);
         when = (TextView) v.findViewById(R.id.detailWhen);
         impact = (TextView) v.findViewById(R.id.detailImpact);
         where = (TextView) v.findViewById(R.id.detailWhere);
@@ -56,6 +58,16 @@ public class SituationDetailFragment extends Fragment
         icon.setImageResource(s.getIconResource());
         type.setText(s.getDisplayType());
         comment.setText(s.getComment());
+        if (s.getDurationColour() != 0)
+        {
+            duration.setText(s.getDurationCategory() + " roadworks (" + s.getDurationText() + ")");
+            duration.setTextColor(ContextCompat.getColor(requireContext(), s.getDurationColour()));
+            duration.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            duration.setVisibility(View.GONE);
+        }
 
         // When: validity
         StringBuilder w = new StringBuilder();

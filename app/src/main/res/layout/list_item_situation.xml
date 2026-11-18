@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One row of the situation list: icon on the left, type and generalPublicComment on the right -->
+<!-- One row of the situation list: duration colour bar, icon, then type, generalPublicComment and duration -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:gravity="center_vertical">
+    android:layout_height="wrap_content">
+
+    <!-- Coloured by roadworks duration (short/medium/long), transparent for incidents -->
+    <View
+        android:id="@+id/itemDurationBar"
+        android:layout_width="6dp"
+        android:layout_height="match_parent" />
 
     <ImageView
         android:id="@+id/itemIcon"
         android:layout_width="32dp"
         android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="12dp"
         android:contentDescription="Situation type icon" />
 
@@ -18,7 +24,9 @@
         android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
         <TextView
             android:id="@+id/itemType"
             android:layout_width="match_parent"
@@ -30,5 +38,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp" />
+        <TextView
+            android:id="@+id/itemDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

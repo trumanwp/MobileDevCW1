@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Roadworks duration colour-coding -->
+    <color name="duration_short">#2E7D32</color>   <!-- up to a week -->
+    <color name="duration_medium">#E68A00</color>  <!-- up to a month -->
+    <color name="duration_long">#C62828</color>    <!-- longer than a month -->
 </resources>
