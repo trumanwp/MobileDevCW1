@@ -104,7 +104,9 @@ public class SituationMapFragment extends Fragment implements OnMapReadyCallback
     {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(panZoom.isChecked());
+        mMap.getUiSettings().setMapToolbarEnabled(false); // no "open in Google Maps" buttons: keep the user in the app
         mMap.setOnInfoWindowClickListener(this);
+        Marker lastMarker = null;
 
         ArrayList<Situation> situations = viewModel.getMapSituations();
         LatLngBounds.Builder bounds = new LatLngBounds.Builder();
@@ -139,6 +141,7 @@ public class SituationMapFragment extends Fragment implements OnMapReadyCallback
             if (marker != null)
             {
                 marker.setTag(s); // so we know which situation was tapped
+                lastMarker = marker;
             }
         }
 
@@ -146,16 +149,21 @@ public class SituationMapFragment extends Fragment implements OnMapReadyCallback
         {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SCOTLAND, 6));
         }
-        else if (situations.size() == 1)
-        {
-            // One situation: zoom in close on it
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.build().getCenter(), 13));
-        }
         else
         {
-            // Several: wait until the map has its size, then fit them all in
+            // Wait until the map has its size, then fit all the points in
             LatLngBounds allPoints = bounds.build();
-            mMap.setOnMapLoadedCallback(() -> mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allPoints, 80)));
+            mMap.setOnMapLoadedCallback(() -> {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allPoints, 120));
+                if (mMap.getCameraPosition().zoom > 14)
+                {
+                    mMap.moveCamera(CameraUpdateFactory.zoomTo(14)); // very short stretches: don't zoom in too far
+                }
+            });
+            if (situations.size() == 1 && lastMarker != null)
+            {
+                lastMarker.showInfoWindow(); // one situation: show its label straight away
+            }
         }
     }
 
