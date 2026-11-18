@@ -6,4 +6,21 @@
     </style>
 
     <style name="Theme.BowieDay_Adam_S1831372" parent="Base.Theme.BowieDay_Adam_S1831372" />
+
+    <!-- Section headings and text in the detail view -->
+    <style name="DetailHeading">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+    <style name="DetailBody">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+    </style>
 </resources>

@@ -2,7 +2,9 @@ package org.me.gcu.bowieday_adam_s1831372;
 
 import android.util.Log;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
@@ -58,6 +60,55 @@ public class Situation
             return workType.isEmpty() ? "Roadworks" : "Roadworks - " + workType;
         }
         return splitCamelCase(subType.isEmpty() ? recordType : subType);
+    }
+
+    /**
+     * How long the situation lasts (start to end), in hours. -1 if there's no end time (incidents).
+     */
+    public long getDurationHours() {
+        if (startTime == null || endTime == null)
+        {
+            return -1;
+        }
+        return Duration.between(startTime, endTime).toHours();
+    }
+
+    // i.e. "3 days 4 hours", "6 hours" or "Ongoing"
+    public String getDurationText() {
+        long hours = getDurationHours();
+        if (hours < 0)
+        {
+            return "Ongoing (no end time given)";
+        }
+        long days = hours / 24;
+        if (days == 0)
+        {
+            return hours + (hours == 1 ? " hour" : " hours");
+        }
+        return days + (days == 1 ? " day" : " days") + (hours % 24 > 0 ? " " + hours % 24 + " hours" : "");
+    }
+
+    // "eastBound" -> "Eastbound"
+    public String getDirectionText() {
+        if (direction.isEmpty())
+        {
+            return "Not given";
+        }
+        return direction.substring(0, 1).toUpperCase() + direction.substring(1).toLowerCase();
+    }
+
+    // "longDelays" -> "Long delays"
+    public String getDelaysText() {
+        return delaysType.isEmpty() ? "" : splitCamelCase(delaysType);
+    }
+
+    // i.e. "Mon 9 Nov 2026, 15:20"
+    public static String formatTime(OffsetDateTime time) {
+        if (time == null)
+        {
+            return "Not given";
+        }
+        return time.format(DateTimeFormatter.ofPattern("EEE d MMM yyyy, HH:mm"));
     }
 
     // "roadClosed" -> "Road closed"

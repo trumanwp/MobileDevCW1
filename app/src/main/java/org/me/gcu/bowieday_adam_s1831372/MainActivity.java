@@ -30,7 +30,7 @@ import androidx.lifecycle.ViewModelProvider;
  * The single Activity: shows the status line and refresh button,
  * and hosts the fragments in fragmentContainer.
  */
-public class MainActivity extends AppCompatActivity implements OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener, SituationListFragment.SituationListListener {
     private TextView statusText;
     private Button startButton;
     private TrafficViewModel viewModel; // Holds the data, survives screen rotation
@@ -67,6 +67,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     public void onClick(View aview)
     {
         viewModel.refresh();
+    }
+
+    // A situation was tapped in the list: show its details (Back returns to the list)
+    @Override
+    public void onSituationSelected()
+    {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new SituationDetailFragment())
+                .addToBackStack(null)
+                .commit();
     }
 
 } // End of class

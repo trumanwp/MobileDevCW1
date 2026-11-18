@@ -1,5 +1,6 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -26,6 +26,34 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     private RadioGroup feedChoice;
     private RadioButton incidentsButton, roadworksButton;
     private SituationAdapter adapter;
+    private SituationListListener listener;
+
+    // The Activity implements this to know when to show the detail view (as in the Pizza fragments lab)
+    public interface SituationListListener
+    {
+        void onSituationSelected();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context)
+    {
+        super.onAttach(context);
+        if (context instanceof SituationListListener)
+        {
+            listener = (SituationListListener) context;
+        }
+        else
+        {
+            throw new RuntimeException(context.toString() + " must implement SituationListListener");
+        }
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        listener = null;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -49,8 +77,7 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     {
         Situation tapped = adapter.getItem(position);
         viewModel.select(tapped);
-        // Temporary until the detail fragment is added
-        Toast.makeText(requireContext(), "Selected: " + tapped.getDisplayType(), Toast.LENGTH_SHORT).show();
+        listener.onSituationSelected();
     }
 
     @Override
