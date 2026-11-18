@@ -63,6 +63,48 @@ public class Situation
     }
 
     /**
+     * Picks the icon for this situation's category (9 categories, see ICON_SOURCES.md).
+     * Incidents use the record type; roadworks use keywords in the work type
+     * (or in the comment if it had no "Location - Work type" split).
+     */
+    public int getIconResource() {
+        if (isRoadworks())
+        {
+            String work = (workType.isEmpty() ? comment : workType).toLowerCase();
+            if (work.contains("ttl") || work.contains("light") || work.contains("stop and go") || work.contains("convoy"))
+            {
+                return R.drawable.ic_temp_lights;
+            }
+            if (work.contains("lane") || work.contains("mlc") || work.contains("hard shoulder") || work.contains("contraflow"))
+            {
+                return R.drawable.ic_lane_closure;
+            }
+            if (work.contains("closure") || work.contains("closed") || work.contains("diversion"))
+            {
+                return R.drawable.ic_road_closure_works;
+            }
+            if (work.contains("speed"))
+            {
+                return R.drawable.ic_speed_restriction;
+            }
+            return R.drawable.ic_roadworks;
+        }
+        if (subType.equalsIgnoreCase("roadClosed"))
+        {
+            return R.drawable.ic_road_closed;
+        }
+        if (recordType.equalsIgnoreCase("Accident"))
+        {
+            return R.drawable.ic_accident;
+        }
+        if (recordType.equalsIgnoreCase("AbnormalTraffic"))
+        {
+            return R.drawable.ic_queue;
+        }
+        return R.drawable.ic_incident_other;
+    }
+
+    /**
      * How long the situation lasts (start to end), in hours. -1 if there's no end time (incidents).
      */
     public long getDurationHours() {

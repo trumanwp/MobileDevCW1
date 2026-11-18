@@ -53,6 +53,7 @@ public class SituationDetailFragment extends Fragment
             comment.setText("Pick an incident or roadworks from the list to see its details.");
             return;
         }
+        icon.setImageResource(s.getIconResource());
         type.setText(s.getDisplayType());
         comment.setText(s.getComment());
 
