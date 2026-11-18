@@ -6,7 +6,10 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -19,15 +22,18 @@ import androidx.lifecycle.ViewModelProvider;
 import java.util.ArrayList;
 
 /**
- * Shows the incidents or the roadworks (chosen with the radio buttons) in a ListView.
+ * Shows the incidents, the roadworks or the road search results (chosen with the radio buttons) in a ListView.
  * The data comes from the Activity's TrafficViewModel, shared by all the fragments.
  */
-public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener, AdapterView.OnItemClickListener
+public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener,
+        AdapterView.OnItemClickListener, View.OnClickListener
 {
     private TrafficViewModel viewModel;
+    private EditText roadEntry;
+    private Button searchButton, clearButton;
     private RadioGroup feedChoice;
-    private RadioButton incidentsButton, roadworksButton;
-    private TextView durationKey;
+    private RadioButton incidentsButton, roadworksButton, searchResultsButton;
+    private TextView durationKey, emptyText;
     private SituationAdapter adapter;
     private SituationListListener listener;
 
@@ -63,9 +69,21 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.frag_situation_list, container, false);
+        roadEntry = (EditText) v.findViewById(R.id.roadEntry);
+        searchButton = (Button) v.findViewById(R.id.searchButton);
+        clearButton = (Button) v.findViewById(R.id.clearButton);
+        searchButton.setOnClickListener(this);
+        clearButton.setOnClickListener(this);
+        // The keyboard's search key does the same as the Search button
+        roadEntry.setOnEditorActionListener((textView, actionId, event) -> {
+            onClick(searchButton);
+            return true;
+        });
+
         feedChoice = (RadioGroup) v.findViewById(R.id.feedChoice);
         incidentsButton = (RadioButton) v.findViewById(R.id.incidentsButton);
         roadworksButton = (RadioButton) v.findViewById(R.id.roadworksButton);
+        searchResultsButton = (RadioButton) v.findViewById(R.id.searchResultsButton);
         durationKey = (TextView) v.findViewById(R.id.durationKey);
         // Each band name is written in its own colour
         durationKey.setText(Html.fromHtml("Duration: "
@@ -74,7 +92,8 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
                 + "<font color='#C62828'><b>■ Long</b></font>", Html.FROM_HTML_MODE_LEGACY));
 
         ListView listView = (ListView) v.findViewById(R.id.situationList);
-        listView.setEmptyView(v.findViewById(R.id.emptyText));
+        emptyText = (TextView) v.findViewById(R.id.emptyText);
+        listView.setEmptyView(emptyText);
         adapter = new SituationAdapter(requireContext(), new ArrayList<>());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
@@ -90,15 +109,50 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     }
 
     @Override
+    public void onClick(View v)
+    {
+        if (v == searchButton)
+        {
+            String road = roadEntry.getText().toString().trim();
+            if (road.isEmpty())
+            {
+                roadEntry.setError("Type a road name first, i.e. M8");
+                return;
+            }
+            viewModel.searchByRoad(road);
+            searchResultsButton.setChecked(true); // shows the results (calls onCheckedChanged)
+            showList();
+            hideKeyboard();
+        }
+        else if (v == clearButton)
+        {
+            roadEntry.setText("");
+            viewModel.searchByRoad("");
+            incidentsButton.setChecked(true);
+            hideKeyboard();
+        }
+    }
+
+    private void hideKeyboard()
+    {
+        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(roadEntry.getWindowToken(), 0);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
         // requireActivity(): the fragments share the Activity's ViewModel instead of having their own
         viewModel = new ViewModelProvider(requireActivity()).get(TrafficViewModel.class);
 
-        if (viewModel.isShowingRoadworks())
+        if (viewModel.getListMode() == TrafficViewModel.SHOW_ROADWORKS)
         {
             roadworksButton.setChecked(true);
+        }
+        else if (viewModel.getListMode() == TrafficViewModel.SHOW_SEARCH)
+        {
+            searchResultsButton.setChecked(true);
         }
         else
         {
@@ -109,12 +163,24 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         // Re-fill the list whenever new data arrives
         viewModel.getIncidents().observe(getViewLifecycleOwner(), list -> showList());
         viewModel.getRoadworks().observe(getViewLifecycleOwner(), list -> showList());
+        viewModel.getSearchResults().observe(getViewLifecycleOwner(), list -> showList());
     }
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId)
     {
-        viewModel.setShowingRoadworks(checkedId == R.id.roadworksButton);
+        if (checkedId == R.id.roadworksButton)
+        {
+            viewModel.setListMode(TrafficViewModel.SHOW_ROADWORKS);
+        }
+        else if (checkedId == R.id.searchResultsButton)
+        {
+            viewModel.setListMode(TrafficViewModel.SHOW_SEARCH);
+        }
+        else
+        {
+            viewModel.setListMode(TrafficViewModel.SHOW_INCIDENTS);
+        }
         showList();
     }
 
@@ -122,12 +188,33 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     {
         ArrayList<Situation> incidents = viewModel.getIncidents().getValue();
         ArrayList<Situation> roadworks = viewModel.getRoadworks().getValue();
+        ArrayList<Situation> results = viewModel.getSearchResults().getValue();
         incidentsButton.setText("Incidents (" + incidents.size() + ")");
         roadworksButton.setText("Roadworks (" + roadworks.size() + ")");
+        searchResultsButton.setText(viewModel.getSearchRoad().isEmpty()
+                ? "Search" : viewModel.getSearchRoad().toUpperCase() + " (" + results.size() + ")");
 
         adapter.clear();
-        adapter.addAll(viewModel.isShowingRoadworks() ? roadworks : incidents);
-        durationKey.setVisibility(viewModel.isShowingRoadworks() ? View.VISIBLE : View.GONE);
+        int mode = viewModel.getListMode();
+        if (mode == TrafficViewModel.SHOW_ROADWORKS)
+        {
+            adapter.addAll(roadworks);
+            emptyText.setText("No roadworks to show");
+        }
+        else if (mode == TrafficViewModel.SHOW_SEARCH)
+        {
+            adapter.addAll(results);
+            emptyText.setText(viewModel.getSearchRoad().isEmpty()
+                    ? "Type a road name above and press Search"
+                    : "Nothing found on " + viewModel.getSearchRoad().toUpperCase());
+        }
+        else
+        {
+            adapter.addAll(incidents);
+            emptyText.setText("No incidents to show");
+        }
+        // The colour key is useful whenever roadworks can be in the list
+        durationKey.setVisibility(mode == TrafficViewModel.SHOW_INCIDENTS ? View.GONE : View.VISIBLE);
     }
 
 } // End of class

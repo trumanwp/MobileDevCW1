@@ -96,4 +96,29 @@ public class TrafficParserTest
         assertEquals("M8 WB Woodside - A804 Phoenix Rd", first.getLocationText());
         assertEquals("Closure", first.getWorkType());
     }
+    // Road search: counts checked by hand against the sample xml files
+    @Test
+    public void searchesByRoad() throws Exception
+    {
+        ArrayList<Situation> all = TrafficParser.parseData(readAsset("roadworksContentExample.xml"));
+        all.addAll(TrafficParser.parseData(readAsset("unplannedContentExample.xml")));
+        assertEquals(21 + 2, countOnRoad(all, "M8"));
+        assertEquals(24 + 1, countOnRoad(all, "a90"));   // lower case still works
+        assertEquals(50, countOnRoad(all, " A9 "));     // spaces ignored, and A90/A96 don't count as A9
+        assertEquals(9, countOnRoad(all, "M80"));
+        assertEquals(0, countOnRoad(all, "Z99"));
+    }
+
+    private int countOnRoad(ArrayList<Situation> list, String road)
+    {
+        int count = 0;
+        for (Situation s : list)
+        {
+            if (s.isOnRoad(road))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
 } // End of class

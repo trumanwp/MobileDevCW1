@@ -43,6 +43,10 @@ public class TrafficViewModel extends ViewModel
                 roadworks.setValue((ArrayList<Situation>) msg.obj);
                 status.setValue("Last updated " + time);
             }
+            if (msg.what != TrafficFeed.MESSAGE_FAILED)
+            {
+                runSearch(); // keep search results in step with the new data
+            }
             else if (msg.what == TrafficFeed.MESSAGE_FAILED)
             {
                 status.setValue("Couldn't download " + msg.obj + " at " + time + " - check the internet connection");
@@ -84,12 +88,50 @@ public class TrafficViewModel extends ViewModel
 
     public LiveData<String> getStatus() { return status; }
 
-    // Which feed the list shows, kept here so it survives rotation
-    private boolean showingRoadworks = false;
+    // What the list shows, kept here so it survives rotation
+    public static final int SHOW_INCIDENTS = 0;
+    public static final int SHOW_ROADWORKS = 1;
+    public static final int SHOW_SEARCH = 2;
+    private int listMode = SHOW_INCIDENTS;
 
-    public boolean isShowingRoadworks() { return showingRoadworks; }
+    public int getListMode() { return listMode; }
 
-    public void setShowingRoadworks(boolean showingRoadworks) { this.showingRoadworks = showingRoadworks; }
+    public void setListMode(int listMode) { this.listMode = listMode; }
+
+    // Road search: incidents and roadworks on the road the user typed
+    private String searchRoad = "";
+    private final MutableLiveData<ArrayList<Situation>> searchResults = new MutableLiveData<>(new ArrayList<>());
+
+    public LiveData<ArrayList<Situation>> getSearchResults() { return searchResults; }
+
+    public String getSearchRoad() { return searchRoad; }
+
+    public void searchByRoad(String road)
+    {
+        searchRoad = road.trim();
+        runSearch();
+    }
+
+    // Also called after each download, so the results stay up to date
+    private void runSearch()
+    {
+        ArrayList<Situation> results = new ArrayList<>();
+        for (Situation s : incidents.getValue())
+        {
+            if (s.isOnRoad(searchRoad))
+            {
+                results.add(s);
+            }
+        }
+        for (Situation s : roadworks.getValue())
+        {
+            if (s.isOnRoad(searchRoad))
+            {
+                results.add(s);
+            }
+        }
+        searchResults.setValue(results);
+    }
 
     // The situation the user tapped in the list (shown in the detail view)
     private final MutableLiveData<Situation> selected = new MutableLiveData<>();

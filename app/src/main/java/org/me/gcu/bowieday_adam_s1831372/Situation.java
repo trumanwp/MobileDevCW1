@@ -381,6 +381,37 @@ public class Situation
         return roads;
     }
 
+    /**
+     * Checks if this situation is on a road, i.e. "M8" or "a90" (ignores case and spaces).
+     * Looks at the road names from the locations, and at each word of the comment
+     * (so "The A6091 is closed..." matches "A6091" but "M80" doesn't match "M8").
+     * @param road  road name typed by the user
+     */
+    public boolean isOnRoad(String road) {
+        String wanted = road.trim().toUpperCase().replace(" ", "");
+        if (wanted.isEmpty())
+        {
+            return false;
+        }
+        for (String roadName : getRoadNames())
+        {
+            if (roadName.toUpperCase().replace(" ", "").equals(wanted))
+            {
+                return true;
+            }
+        }
+        // Split the comment into words at anything that isn't a letter, number or bracket
+        String[] words = comment.toUpperCase().split("[^A-Z0-9()]+");
+        for (String word : words)
+        {
+            if (word.equals(wanted))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Times in the feed look like "2026-08-10T11:38:10+01:00"
     private OffsetDateTime parseTime(String text) {
         try {
