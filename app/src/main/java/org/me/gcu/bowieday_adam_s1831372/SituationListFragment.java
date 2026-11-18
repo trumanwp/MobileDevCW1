@@ -35,25 +35,20 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     private RadioButton incidentsButton, roadworksButton, searchResultsButton;
     private TextView durationKey, emptyText;
     private SituationAdapter adapter;
-    private SituationListListener listener;
-
-    // The Activity implements this to know when to show the detail view (as in the Pizza fragments lab)
-    public interface SituationListListener
-    {
-        void onSituationSelected();
-    }
+    private Button mapButton;
+    private NavigationListener listener;
 
     @Override
     public void onAttach(@NonNull Context context)
     {
         super.onAttach(context);
-        if (context instanceof SituationListListener)
+        if (context instanceof NavigationListener)
         {
-            listener = (SituationListListener) context;
+            listener = (NavigationListener) context;
         }
         else
         {
-            throw new RuntimeException(context.toString() + " must implement SituationListListener");
+            throw new RuntimeException(context.toString() + " must implement NavigationListener");
         }
     }
 
@@ -74,6 +69,8 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         clearButton = (Button) v.findViewById(R.id.clearButton);
         searchButton.setOnClickListener(this);
         clearButton.setOnClickListener(this);
+        mapButton = (Button) v.findViewById(R.id.mapButton);
+        mapButton.setOnClickListener(this);
         // The keyboard's search key does the same as the Search button
         roadEntry.setOnEditorActionListener((textView, actionId, event) -> {
             onClick(searchButton);
@@ -123,6 +120,17 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
             searchResultsButton.setChecked(true); // shows the results (calls onCheckedChanged)
             showList();
             hideKeyboard();
+        }
+        else if (v == mapButton)
+        {
+            // Put whatever the list is showing on the map (i.e. all the M8 search results)
+            ArrayList<Situation> shown = new ArrayList<>();
+            for (int i = 0; i < adapter.getCount(); i++)
+            {
+                shown.add(adapter.getItem(i));
+            }
+            viewModel.setMapSituations(shown, currentListName());
+            listener.onShowMap();
         }
         else if (v == clearButton)
         {
@@ -184,6 +192,21 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         showList();
     }
 
+    // i.e. "Roadworks" or "Search: M8", used as the map title
+    private String currentListName()
+    {
+        int mode = viewModel.getListMode();
+        if (mode == TrafficViewModel.SHOW_ROADWORKS)
+        {
+            return "Roadworks";
+        }
+        if (mode == TrafficViewModel.SHOW_SEARCH)
+        {
+            return "Search: " + viewModel.getSearchRoad().toUpperCase();
+        }
+        return "Incidents";
+    }
+
     private void showList()
     {
         ArrayList<Situation> incidents = viewModel.getIncidents().getValue();
@@ -215,6 +238,8 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         }
         // The colour key is useful whenever roadworks can be in the list
         durationKey.setVisibility(mode == TrafficViewModel.SHOW_INCIDENTS ? View.GONE : View.VISIBLE);
+        mapButton.setText("Show these " + adapter.getCount() + " on the map");
+        mapButton.setEnabled(adapter.getCount() > 0);
     }
 
 } // End of class

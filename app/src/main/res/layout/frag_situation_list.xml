@@ -57,6 +57,14 @@
             android:text="Search" />
     </RadioGroup>
 
+    <!-- Shows everything currently in the list on the map -->
+    <Button
+        android:id="@+id/mapButton"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show on the map" />
+
     <!-- Colour key for the roadworks duration bars (only shown with roadworks) -->
     <TextView
         android:id="@+id/durationKey"

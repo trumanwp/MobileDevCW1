@@ -133,6 +133,20 @@ public class TrafficViewModel extends ViewModel
         searchResults.setValue(results);
     }
 
+    // What the map shows: set by the list (all/search results) or the detail view (one situation)
+    private ArrayList<Situation> mapSituations = new ArrayList<>();
+    private String mapTitle = "";
+
+    public ArrayList<Situation> getMapSituations() { return mapSituations; }
+
+    public String getMapTitle() { return mapTitle; }
+
+    public void setMapSituations(ArrayList<Situation> situations, String title)
+    {
+        mapSituations = new ArrayList<>(situations);
+        mapTitle = title;
+    }
+
     // The situation the user tapped in the list (shown in the detail view)
     private final MutableLiveData<Situation> selected = new MutableLiveData<>();
 
