@@ -1,14 +1,18 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
+import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
+import java.time.Instant;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -17,8 +21,10 @@ import java.util.ArrayList;
  * while the Activity/Fragments are re-created (lecture 7c).
  * It's the middleman between the View (Activity/Fragments) and the Model (TrafficFeed, TrafficParser):
  * it asks TrafficFeed for data and exposes the results as observable LiveData.
+ * It's an AndroidViewModel (a ViewModel that knows the Application) because TrafficFeed
+ * needs a Context for the saved files in internal storage.
  */
-public class TrafficViewModel extends ViewModel
+public class TrafficViewModel extends AndroidViewModel
 {
     private final MutableLiveData<ArrayList<Situation>> incidents = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<ArrayList<Situation>> roadworks = new MutableLiveData<>(new ArrayList<>());
@@ -33,23 +39,35 @@ public class TrafficViewModel extends ViewModel
         {
             // Runs on the main thread, so setValue() is safe here
             String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+            if (msg.what == TrafficFeed.MESSAGE_FAILED)
+            {
+                status.setValue("Couldn't load " + msg.obj + " at " + time);
+                return;
+            }
             if (msg.what == TrafficFeed.MESSAGE_INCIDENTS)
             {
                 incidents.setValue((ArrayList<Situation>) msg.obj);
-                status.setValue("Last updated " + time);
             }
             else if (msg.what == TrafficFeed.MESSAGE_ROADWORKS)
             {
                 roadworks.setValue((ArrayList<Situation>) msg.obj);
+            }
+            runSearch(); // keep search results in step with the new data
+
+            // Say where the data came from
+            if (msg.arg1 == TrafficFeed.SOURCE_LIVE)
+            {
                 status.setValue("Last updated " + time);
             }
-            if (msg.what != TrafficFeed.MESSAGE_FAILED)
+            else if (msg.arg1 == TrafficFeed.SOURCE_SAVED)
             {
-                runSearch(); // keep search results in step with the new data
+                String savedAt = Instant.ofEpochMilli(msg.getData().getLong("savedAt"))
+                        .atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("EEE d MMM, HH:mm"));
+                status.setValue("Offline (" + msg.getData().getString("problem") + "): showing data saved " + savedAt);
             }
-            else if (msg.what == TrafficFeed.MESSAGE_FAILED)
+            else
             {
-                status.setValue("Couldn't download " + msg.obj + " at " + time + " - check the internet connection");
+                status.setValue("Offline (" + msg.getData().getString("problem") + "): no saved data yet, showing sample data");
             }
         }
     };
@@ -68,8 +86,9 @@ public class TrafficViewModel extends ViewModel
         }
     };
 
-    public TrafficViewModel()
+    public TrafficViewModel(@NonNull Application application)
     {
+        super(application);
         // Only runs the first time the ViewModel is created (not on rotation),
         // so the app downloads on start-up without a button press
         updateHandler.post(refreshTask);
@@ -160,7 +179,7 @@ public class TrafficViewModel extends ViewModel
     public void refresh()
     {
         status.setValue("Downloading...");
-        TrafficFeed.startDownload(updateHandler);
+        TrafficFeed.startDownload(updateHandler, getApplication());
     }
 
 } // End of class
