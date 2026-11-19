@@ -31,6 +31,32 @@
             android:text="Clear" />
     </LinearLayout>
 
+    <!-- Distance search: within X km of Glasgow city centre (or the phone's location) -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+        <EditText
+            android:id="@+id/kmEntry"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="km, i.e. 20"
+            android:inputType="numberDecimal"
+            android:maxLines="1" />
+        <CheckBox
+            android:id="@+id/myLocationBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My location" />
+        <Button
+            android:id="@+id/nearbyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Find nearby" />
+    </LinearLayout>
+
     <!-- Choose what the list shows -->
     <RadioGroup
         android:id="@+id/feedChoice"

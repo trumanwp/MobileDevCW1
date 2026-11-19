@@ -117,17 +117,49 @@ public class TrafficViewModel extends AndroidViewModel
 
     public void setListMode(int listMode) { this.listMode = listMode; }
 
-    // Road search: incidents and roadworks on the road the user typed
+    // Search: by road name (i.e. "M8") or by distance from a point (i.e. within 20 km of Glasgow)
     private String searchRoad = "";
+    private double searchKm = 0;              // 0 = not a distance search
+    private double searchLat, searchLon;
+    private String searchPlace = "";          // i.e. "Glasgow city centre" or "your location"
     private final MutableLiveData<ArrayList<Situation>> searchResults = new MutableLiveData<>(new ArrayList<>());
 
     public LiveData<ArrayList<Situation>> getSearchResults() { return searchResults; }
 
-    public String getSearchRoad() { return searchRoad; }
+    // Short name for the search, i.e. "M8" or "Within 20 km", or "" if nothing searched yet
+    public String getSearchLabel()
+    {
+        if (searchKm > 0)
+        {
+            return "Within " + formatKm(searchKm) + " km";
+        }
+        return searchRoad.toUpperCase();
+    }
+
+    // Longer version for the map title, i.e. "Within 20 km of Glasgow city centre"
+    public String getSearchDescription()
+    {
+        if (searchKm > 0)
+        {
+            return getSearchLabel() + " of " + searchPlace;
+        }
+        return "Search: " + getSearchLabel();
+    }
 
     public void searchByRoad(String road)
     {
         searchRoad = road.trim();
+        searchKm = 0;
+        runSearch();
+    }
+
+    public void searchByDistance(double km, double lat, double lon, String place)
+    {
+        searchRoad = "";
+        searchKm = km;
+        searchLat = lat;
+        searchLon = lon;
+        searchPlace = place;
         runSearch();
     }
 
@@ -135,21 +167,27 @@ public class TrafficViewModel extends AndroidViewModel
     private void runSearch()
     {
         ArrayList<Situation> results = new ArrayList<>();
-        for (Situation s : incidents.getValue())
+        ArrayList<Situation> all = new ArrayList<>(incidents.getValue());
+        all.addAll(roadworks.getValue());
+        for (Situation s : all)
         {
-            if (s.isOnRoad(searchRoad))
+            if (searchKm > 0 ? s.getDistanceKm(searchLat, searchLon) <= searchKm : s.isOnRoad(searchRoad))
             {
                 results.add(s);
             }
         }
-        for (Situation s : roadworks.getValue())
+        if (searchKm > 0)
         {
-            if (s.isOnRoad(searchRoad))
-            {
-                results.add(s);
-            }
+            // Nearest first
+            results.sort((a, b) -> Double.compare(a.getDistanceKm(searchLat, searchLon), b.getDistanceKm(searchLat, searchLon)));
         }
         searchResults.setValue(results);
+    }
+
+    // 20.0 -> "20", 2.5 -> "2.5"
+    private static String formatKm(double km)
+    {
+        return km == Math.floor(km) ? String.valueOf((long) km) : String.valueOf(km);
     }
 
     // What the map shows: set by the list (all/search results) or the detail view (one situation)

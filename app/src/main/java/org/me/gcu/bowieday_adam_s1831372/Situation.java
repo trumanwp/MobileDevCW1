@@ -1,5 +1,6 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
+import android.location.Location;
 import android.util.Log;
 
 import java.time.Duration;
@@ -410,6 +411,21 @@ public class Situation
             }
         }
         return false;
+    }
+
+    /**
+     * Distance in km from a point to the nearest end ("from" or "to") of this situation.
+     * Uses Android's Location.distanceBetween, which allows for the Earth's curve.
+     */
+    public double getDistanceKm(double lat, double lon) {
+        double nearest = Double.MAX_VALUE;
+        float[] metres = new float[1];
+        for (LocationPoint p : points)
+        {
+            Location.distanceBetween(lat, lon, p.getLatitude(), p.getLongitude(), metres);
+            nearest = Math.min(nearest, metres[0] / 1000.0);
+        }
+        return nearest;
     }
 
     // Times in the feed look like "2026-08-10T11:38:10+01:00"
