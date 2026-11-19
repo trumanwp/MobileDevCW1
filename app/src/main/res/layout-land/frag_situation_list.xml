@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: search controls in a column on the left, the list on the right -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Controls (scrolls if the screen is short) -->
+    <ScrollView
+        android:layout_width="270dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="8dp">
+
+            <!-- Road search -->
+            <EditText
+                android:id="@+id/roadEntry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Road name, i.e. M8"
+                android:inputType="textCapCharacters"
+                android:imeOptions="actionSearch"
+                android:maxLines="1" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/searchButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Search" />
+                <Button
+                    android:id="@+id/clearButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Clear" />
+            </LinearLayout>
+
+            <!-- Distance search -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+                <EditText
+                    android:id="@+id/kmEntry"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="km, i.e. 20"
+                    android:inputType="numberDecimal"
+                    android:maxLines="1" />
+                <CheckBox
+                    android:id="@+id/myLocationBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My location" />
+            </LinearLayout>
+            <Button
+                android:id="@+id/nearbyButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Find nearby" />
+
+            <!-- What the list shows, one option per line -->
+            <RadioGroup
+                android:id="@+id/feedChoice"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/incidentsButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Incidents" />
+                <RadioButton
+                    android:id="@+id/roadworksButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Roadworks" />
+                <RadioButton
+                    android:id="@+id/searchResultsButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search" />
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/mapButton"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Show on the map" />
+
+            <TextView
+                android:id="@+id/durationKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- The list (or the empty message) fills the rest -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+        <ListView
+            android:id="@+id/situationList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <TextView
+            android:id="@+id/emptyText"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Nothing to show yet" />
+    </LinearLayout>
+</LinearLayout>

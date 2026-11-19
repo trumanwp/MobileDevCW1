@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: title, status and refresh move to a sidebar on the left,
+     so the fragments get the full height of the screen on the right -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <!-- Sidebar -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="170dp"
+        android:layout_height="match_parent"
+        android:paddingEnd="8dp">
+        <TextView
+            android:id="@+id/salutation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="Scottish Traffic Info"
+            />
+        <TextView
+            android:id="@+id/acknowledgement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:text="Contains Traffic Scotland data"
+            />
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="14sp"
+            android:text="Not downloaded yet"
+            />
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Refresh now"
+            />
+    </LinearLayout>
+
+    <!-- The fragments (list, detail, map) are placed here -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+</LinearLayout>

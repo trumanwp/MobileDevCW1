@@ -103,7 +103,7 @@ public class SituationMapFragment extends Fragment implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap)
     {
         mMap = googleMap;
-        mMap.getUiSettings().setZoomControlsEnabled(panZoom.isChecked());
+        applyMapOptions();
         mMap.getUiSettings().setMapToolbarEnabled(false); // no "open in Google Maps" buttons: keep the user in the app
         mMap.setOnInfoWindowClickListener(this);
         Marker lastMarker = null;
@@ -179,21 +179,26 @@ public class SituationMapFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onClick(View v)
     {
-        if (mMap == null)
+        if (mMap != null) // map not ready yet otherwise
         {
-            return; // map not ready yet
+            applyMapOptions();
         }
-        if (v == normalViewButton)
-        {
-            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        }
-        else if (v == satelliteViewButton)
+    }
+
+    // Sets the map to match the buttons (also used after a rotation, when Android restores the buttons)
+    private void applyMapOptions()
+    {
+        if (satelliteViewButton.isChecked())
         {
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID); // satellite photo + road names
         }
-        else if (v == terrainViewButton)
+        else if (terrainViewButton.isChecked())
         {
             mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        }
+        else
+        {
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
         mMap.getUiSettings().setZoomControlsEnabled(panZoom.isChecked());
     }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: map options down the left, the map fills the rest -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:paddingEnd="8dp">
+        <TextView
+            android:id="@+id/mapTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <RadioGroup
+            android:id="@+id/mapTypeGroup"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/normalViewRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Normal" />
+            <RadioButton
+                android:id="@+id/satelliteViewRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Satellite" />
+            <RadioButton
+                android:id="@+id/terrainViewRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Terrain" />
+        </RadioGroup>
+        <CheckBox
+            android:id="@+id/panZoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zoom" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:text="Red = incident, orange = roadworks. Tap a marker, then its label, for the details." />
+    </LinearLayout>
+
+    <fragment xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:ignore="FragmentTagUsage" />
+</LinearLayout>
