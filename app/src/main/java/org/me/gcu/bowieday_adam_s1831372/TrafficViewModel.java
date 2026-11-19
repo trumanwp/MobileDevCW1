@@ -41,7 +41,7 @@ public class TrafficViewModel extends AndroidViewModel
             String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
             if (msg.what == TrafficFeed.MESSAGE_FAILED)
             {
-                status.setValue("Couldn't load " + msg.obj + " at " + time);
+                status.setValue("Offline (" + msg.getData().getString("problem") + "): no data saved yet, try again later");
                 return;
             }
             if (msg.what == TrafficFeed.MESSAGE_INCIDENTS)
@@ -59,15 +59,11 @@ public class TrafficViewModel extends AndroidViewModel
             {
                 status.setValue("Last updated " + time);
             }
-            else if (msg.arg1 == TrafficFeed.SOURCE_SAVED)
+            else
             {
                 String savedAt = Instant.ofEpochMilli(msg.getData().getLong("savedAt"))
                         .atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("EEE d MMM, HH:mm"));
                 status.setValue("Offline (" + msg.getData().getString("problem") + "): showing data saved " + savedAt);
-            }
-            else
-            {
-                status.setValue("Offline (" + msg.getData().getString("problem") + "): no saved data yet, showing sample data");
             }
         }
     };

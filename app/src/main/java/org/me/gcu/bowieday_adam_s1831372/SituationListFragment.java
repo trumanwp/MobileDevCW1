@@ -1,33 +1,20 @@
 package org.me.gcu.bowieday_adam_s1831372;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -35,7 +22,7 @@ import java.util.ArrayList;
 
 /**
  * Shows the incidents, the roadworks or the search results (chosen with the radio buttons) in a ListView.
- * Searches can be by road name, or by distance from Glasgow city centre / the phone's location.
+ * Searches can be by road name, or by distance from a fixed point (Glasgow city centre).
  * The data comes from the Activity's TrafficViewModel, shared by all the fragments.
  */
 public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener,
@@ -46,19 +33,14 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     private Button searchButton, clearButton;
     private EditText kmEntry;
     private Button nearbyButton;
-    private CheckBox myLocationBox;
-    private boolean askedForLocation = false;
 
     // Fixed point for the distance search (the brief allows a fixed lat/long): Glasgow city centre
     private static final double GLASGOW_LAT = 55.8609;
     private static final double GLASGOW_LON = -4.2514;
-
-    // Asks the user for the coarse location permission, then runs the search again either way
-    private final ActivityResultLauncher<String> locationPermission =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> findNearby());
     private RadioGroup feedChoice;
     private RadioButton incidentsButton, roadworksButton, searchResultsButton;
-    private TextView durationKey, emptyText;
+    private View durationKey;
+    private TextView emptyText;
     private SituationAdapter adapter;
     private Button mapButton;
     private NavigationListener listener;
@@ -98,7 +80,6 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         mapButton.setOnClickListener(this);
         kmEntry = (EditText) v.findViewById(R.id.kmEntry);
         nearbyButton = (Button) v.findViewById(R.id.nearbyButton);
-        myLocationBox = (CheckBox) v.findViewById(R.id.myLocationBox);
         nearbyButton.setOnClickListener(this);
         // The keyboard's search key does the same as the Search button
         roadEntry.setOnEditorActionListener((textView, actionId, event) -> {
@@ -110,12 +91,7 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
         incidentsButton = (RadioButton) v.findViewById(R.id.incidentsButton);
         roadworksButton = (RadioButton) v.findViewById(R.id.roadworksButton);
         searchResultsButton = (RadioButton) v.findViewById(R.id.searchResultsButton);
-        durationKey = (TextView) v.findViewById(R.id.durationKey);
-        // Each band name is written in its own colour
-        durationKey.setText(Html.fromHtml("Duration: "
-                + "<font color='#2E7D32'><b>■ Short</b></font> (up to a week)  "
-                + "<font color='#E68A00'><b>■ Medium</b></font> (up to a month)  "
-                + "<font color='#C62828'><b>■ Long</b></font>", Html.FROM_HTML_MODE_LEGACY));
+        durationKey = v.findViewById(R.id.durationKey);
 
         ListView listView = (ListView) v.findViewById(R.id.situationList);
         emptyText = (TextView) v.findViewById(R.id.emptyText);
@@ -176,8 +152,7 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
     }
 
     /**
-     * Distance search: everything within the typed number of km of Glasgow city centre,
-     * or of the phone's (coarse) location if "My location" is ticked.
+     * Distance search: everything within the typed number of km of Glasgow city centre, nearest first.
      */
     private void findNearby()
     {
@@ -196,102 +171,10 @@ public class SituationListFragment extends Fragment implements RadioGroup.OnChec
             kmEntry.setError("Type a distance in km, i.e. 20");
             return;
         }
-
-        hideKeyboard();
-        if (!myLocationBox.isChecked())
-        {
-            showNearby(km, null);
-            return;
-        }
-        boolean allowed = ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        if (!allowed && !askedForLocation)
-        {
-            askedForLocation = true;
-            locationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION); // comes back to findNearby()
-            return;
-        }
-        if (!allowed)
-        {
-            showNearby(km, null);
-            return;
-        }
-        findCurrentLocation(km);
-    }
-
-    /**
-     * Asks the phone for a fresh location (the last known one can be old and far away),
-     * then runs the search. Falls back to the last known location if there's no fresh one.
-     */
-    @SuppressLint("MissingPermission")
-    private void findCurrentLocation(double km)
-    {
-        LocationManager manager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        String provider = null;
-        for (String p : new String[] {"fused", LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER})
-        {
-            if (manager.getProviders(true).contains(p))
-            {
-                provider = p;
-                break;
-            }
-        }
-        if (provider == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
-        {
-            showNearby(km, lastKnownLocation()); // getCurrentLocation needs Android 11+
-            return;
-        }
-        Toast.makeText(requireContext(), "Finding your location...", Toast.LENGTH_SHORT).show();
-        manager.getCurrentLocation(provider, null, ContextCompat.getMainExecutor(requireContext()), location -> {
-            if (isAdded()) // the user might have left this screen while waiting
-            {
-                showNearby(km, location != null ? location : lastKnownLocation());
-            }
-        });
-    }
-
-    // Runs the distance search from a location, or from Glasgow city centre if location is null
-    private void showNearby(double km, Location here)
-    {
-        if (here != null && inScotland(here))
-        {
-            viewModel.searchByDistance(km, here.getLatitude(), here.getLongitude(), "your location");
-        }
-        else
-        {
-            if (myLocationBox.isChecked())
-            {
-                // Traffic Scotland only covers Scotland, so a location elsewhere would never find anything
-                String reason = (here == null) ? "Couldn't get your location" : "Your location is outside Scotland";
-                Toast.makeText(requireContext(), reason + ", using Glasgow city centre", Toast.LENGTH_LONG).show();
-            }
-            viewModel.searchByDistance(km, GLASGOW_LAT, GLASGOW_LON, "Glasgow city centre");
-        }
-        searchResultsButton.setChecked(true);
+        viewModel.searchByDistance(km, GLASGOW_LAT, GLASGOW_LON, "Glasgow city centre");
+        searchResultsButton.setChecked(true); // shows the results (calls onCheckedChanged)
         showList();
-    }
-
-    // Rough box around Scotland (plus a bit of northern England for border roads like the A74(M)/M6)
-    private static boolean inScotland(Location l)
-    {
-        return l.getLatitude() > 54.5 && l.getLatitude() < 61.0 && l.getLongitude() > -8.0 && l.getLongitude() < -0.5;
-    }
-
-    // Most recent location any provider knows about (null if none). Only called once permission is granted
-    @SuppressLint("MissingPermission")
-    private Location lastKnownLocation()
-    {
-        LocationManager manager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        Location best = null;
-        for (String provider : manager.getProviders(true))
-        {
-            Location l = manager.getLastKnownLocation(provider);
-            if (l != null && (best == null || l.getTime() > best.getTime()))
-            {
-                best = l;
-            }
-        }
-        return best;
+        hideKeyboard();
     }
 
     private void hideKeyboard()

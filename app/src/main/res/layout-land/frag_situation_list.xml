@@ -53,14 +53,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="km, i.e. 20"
+                    android:hint="km from Glasgow, i.e. 20"
                     android:inputType="numberDecimal"
                     android:maxLines="1" />
-                <CheckBox
-                    android:id="@+id/myLocationBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="My location" />
             </LinearLayout>
             <Button
                 android:id="@+id/nearbyButton"
@@ -98,11 +93,40 @@
                 android:layout_height="wrap_content"
                 android:text="Show on the map" />
 
-            <TextView
+            <!-- Colour key for the roadworks duration bars (only shown when roadworks can be in the list) -->
+            <LinearLayout
                 android:id="@+id/durationKey"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="13sp" />
+                android:paddingBottom="4dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:text="Duration: " />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/duration_short"
+                    android:text="Short (up to a week)  " />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/duration_medium"
+                    android:text="Medium (up to a month)  " />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/duration_long"
+                    android:text="Long" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

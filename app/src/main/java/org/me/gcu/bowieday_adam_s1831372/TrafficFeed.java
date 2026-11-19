@@ -24,19 +24,17 @@ import java.util.Base64;
  *
  * Every successful download is also saved in the app's internal storage (lecture 8a),
  * so if the feed can't be reached later the last saved data is shown instead.
- * On a fresh install with nothing saved yet, the module's sample data in res/raw is used.
  */
 public class TrafficFeed
 {
     // Message type codes (msg.what)
     public static final int MESSAGE_INCIDENTS = 1;    // msg.obj = ArrayList<Situation>
     public static final int MESSAGE_ROADWORKS = 2;    // msg.obj = ArrayList<Situation>
-    public static final int MESSAGE_FAILED = 3;       // msg.obj = String saying which feed failed
+    public static final int MESSAGE_FAILED = 3;       // msg.obj = String saying which feed failed (nothing saved either)
 
     // Where the data came from (msg.arg1). If not live, msg.getData() has "problem" (and "savedAt" if saved)
     public static final int SOURCE_LIVE = 0;
     public static final int SOURCE_SAVED = 1;
-    public static final int SOURCE_SAMPLE = 2;
 
     private static final String INCIDENTS_URL = "https://datex2.trafficscotland.org/rest/2.3/publications/UnplannedEvents/Content.xml";
     private static final String ROADWORKS_URL = "https://datex2.trafficscotland.org/rest/2.3/publications/CurrentRoadworks/Content.xml";
@@ -49,7 +47,7 @@ public class TrafficFeed
      * Starts a worker thread that downloads and parses both feeds.
      * Incidents are sent first as they're small; the roadworks feed is ~1.3MB.
      * @param uiHandler  Handler created on the main thread, receives the results
-     * @param context    used for the internal storage folder and the res/raw sample files
+     * @param context    used for the internal storage folder
      */
     public static void startDownload(final Handler uiHandler, final Context context)
     {
@@ -58,16 +56,15 @@ public class TrafficFeed
             @Override
             public void run()
             {
-                sendResult(uiHandler, context, MESSAGE_INCIDENTS, "incidents", INCIDENTS_URL, R.raw.sample_incidents);
-                sendResult(uiHandler, context, MESSAGE_ROADWORKS, "roadworks", ROADWORKS_URL, R.raw.sample_roadworks);
+                sendResult(uiHandler, context, MESSAGE_INCIDENTS, "incidents", INCIDENTS_URL);
+                sendResult(uiHandler, context, MESSAGE_ROADWORKS, "roadworks", ROADWORKS_URL);
             }
         };
         workerThread.start();
     } // End of startDownload
 
     // Runs on the worker thread: download (or load the saved copy), parse, then message the UI thread
-    private static void sendResult(Handler uiHandler, Context context, int what, String feedName,
-                                   String feedUrl, int sampleResource)
+    private static void sendResult(Handler uiHandler, Context context, int what, String feedName, String feedUrl)
     {
         Message message = new Message();
         message.what = what;
@@ -86,17 +83,9 @@ public class TrafficFeed
             String problem = (e.getMessage() != null && e.getMessage().startsWith("HTTP"))
                     ? "Traffic Scotland isn't responding" : "no internet connection";
             message.getData().putString("problem", problem);
-            xml = readFromFile(savedFile);
-            if (xml != null)
-            {
-                message.arg1 = SOURCE_SAVED;
-                message.getData().putLong("savedAt", savedFile.lastModified());
-            }
-            else
-            {
-                xml = readFromStream(context.getResources().openRawResource(sampleResource));
-                message.arg1 = SOURCE_SAMPLE;
-            }
+            xml = readFromFile(savedFile); // null if nothing has been saved yet
+            message.arg1 = SOURCE_SAVED;
+            message.getData().putLong("savedAt", savedFile.lastModified());
         }
 
         if (xml == null)
@@ -187,7 +176,7 @@ public class TrafficFeed
         }
     }
 
-    // Reads a whole stream (download, saved file or res/raw file) into a String
+    // Reads a whole stream (download or saved file) into a String
     private static String readFromStream(InputStream stream)
     {
         StringBuilder result = new StringBuilder(); // much faster than String + String for the 1.3MB roadworks feed
