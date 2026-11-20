@@ -39,7 +39,7 @@ public class SituationAdapter extends ArrayAdapter<Situation>
         type.setText(s.getDisplayType());
         comment.setText(s.getComment());
 
-        // Roadworks: colour bar + "Long-term · 1624 days" in the duration colour. Incidents: nothing
+        // Roadworks: colour bar + "Long-term · about 4 years" in the duration colour. Incidents: nothing
         View bar = convertView.findViewById(R.id.itemDurationBar);
         TextView duration = (TextView) convertView.findViewById(R.id.itemDuration);
         if (s.getDurationColour() != 0)

@@ -28,15 +28,15 @@ import java.util.ArrayList;
 public class SituationListFragment extends Fragment implements RadioGroup.OnCheckedChangeListener,
         AdapterView.OnItemClickListener, View.OnClickListener
 {
+    // Fixed point for the distance search (the brief allows a fixed lat/long): Glasgow city centre
+    private static final double GLASGOW_LAT = 55.8609;
+    private static final double GLASGOW_LON = -4.2514;
+
     private TrafficViewModel viewModel;
     private EditText roadEntry;
     private Button searchButton, clearButton;
     private EditText kmEntry;
     private Button nearbyButton;
-
-    // Fixed point for the distance search (the brief allows a fixed lat/long): Glasgow city centre
-    private static final double GLASGOW_LAT = 55.8609;
-    private static final double GLASGOW_LON = -4.2514;
     private RadioGroup feedChoice;
     private RadioButton incidentsButton, roadworksButton, searchResultsButton;
     private View durationKey;

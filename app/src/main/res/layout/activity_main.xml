@@ -45,7 +45,7 @@
             />
     </LinearLayout>
 
-    <!-- The fragments (list, later detail/map) are placed here -->
+    <!-- The fragments (list, detail, map) are placed here -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"

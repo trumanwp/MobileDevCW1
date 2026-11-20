@@ -43,20 +43,13 @@
             </LinearLayout>
 
             <!-- Distance search -->
-            <LinearLayout
-                android:orientation="horizontal"
+            <EditText
+                android:id="@+id/kmEntry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
-                <EditText
-                    android:id="@+id/kmEntry"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="km from Glasgow, i.e. 20"
-                    android:inputType="numberDecimal"
-                    android:maxLines="1" />
-            </LinearLayout>
+                android:hint="km from Glasgow, i.e. 20"
+                android:inputType="numberDecimal"
+                android:maxLines="1" />
             <Button
                 android:id="@+id/nearbyButton"
                 android:layout_width="match_parent"

@@ -1,16 +1,14 @@
-/*  Starter project for Mobile Platform Development - 1st diet 26/27
-    You should use this project as the starting point for your assignment.
-    This project simply reads the data from the required source and displays the
-    raw data in a TextField
+/*  Mobile Platform Development coursework - 1st diet 26/27
+    Built from the starter project. Downloads the Traffic Scotland incidents and
+    roadworks feeds and shows them as a list, details and on a map.
 */
 
 //
 // Name                 Adam Bowie-Day
 // Student ID           S1831372
-// Programme of Study   _________________
+// Programme of Study   BSc Computing
 //
 
-// UPDATE THE PACKAGE NAME to include your Student Identifier
 package org.me.gcu.bowieday_adam_s1831372;
 
 import android.os.Bundle;

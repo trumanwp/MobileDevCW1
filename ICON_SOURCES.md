@@ -1,11 +1,11 @@
 # Icon sources
 
-All situation icons are from **Google Material Icons** (filled/"baseline" style), added through
-Android Studio's Vector Asset tool (the icon set bundled with Android Studio).
+All the situation icons are Google Material Icons (filled style), added with
+Android Studio's Vector Asset tool.
 
-- Source: https://fonts.google.com/icons / https://github.com/google/material-design-icons
-- Licence: **Apache License 2.0**, which allows use, modification and redistribution (including in apps),
-  as long as the licence is credited. Only the tint colour was changed.
+- Source: https://fonts.google.com/icons and https://github.com/google/material-design-icons
+- Licence: Apache License 2.0, which allows them to be used and changed in apps as long as
+  the licence is credited. Only the tint colour was changed.
 
 | Drawable | Material icon | Used for |
 |---|---|---|

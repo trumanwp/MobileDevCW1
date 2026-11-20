@@ -68,7 +68,7 @@ public class TrafficViewModel extends AndroidViewModel
         }
     };
 
-    // Auto-update: every hour (can be reduced for the demo video)
+    // Auto-update every hour
     private static final long REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
     // Downloads, then schedules itself to run again after REFRESH_INTERVAL_MS
@@ -117,7 +117,7 @@ public class TrafficViewModel extends AndroidViewModel
     private String searchRoad = "";
     private double searchKm = 0;              // 0 = not a distance search
     private double searchLat, searchLon;
-    private String searchPlace = "";          // i.e. "Glasgow city centre" or "your location"
+    private String searchPlace = "";          // i.e. "Glasgow city centre"
     private final MutableLiveData<ArrayList<Situation>> searchResults = new MutableLiveData<>(new ArrayList<>());
 
     public LiveData<ArrayList<Situation>> getSearchResults() { return searchResults; }
